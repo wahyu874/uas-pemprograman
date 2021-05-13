@@ -1,124 +1,94 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_application_wahyu/helper/dbhelper.dart';
-import 'package:flutter_application_wahyu/ui/inputpenjualan.dart';
-import 'package:flutter_application_wahyu/models/penjualan.dart';
-import 'package:sqflite/sqflite.dart';
-import 'dart:async';
+import 'dart:convert';
 
-class Home extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+class DataScreen extends StatefulWidget {
   @override
-  _HomeState createState() => _HomeState();
+  _DataScreenState createState() => _DataScreenState();
 }
 
-class _HomeState extends State<Home> {
-  DbHelper dbHelper = DbHelper();
-  int count = 0;
-  List<Penjualan> penjualanList;
+class _DataScreenState extends State<DataScreen> {
+  final String url = "http://192.168.1.4:80/api/inputs";
+
+  Future getData() async {
+    var response = await http.get(Uri.parse(url));
+    return jsonDecode(response.body);
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (penjualanList == null) {
-      penjualanList = List<Penjualan>();
-    }
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Penjualan Laptop & PC'),
-        leading: Icon(Icons.shopping_bag_outlined),
-      ),
-      body: createListView(),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        tooltip: 'Input Penjualan',
-        onPressed: () async {
-          var penjualan = await navigateToEntryForm(context, null);
-          if (penjualan != null) addPenjualan(penjualan);
-        },
-      ),
+    return Scaffold();
+    appBar:
+    AppBar(
+      title: Text('Wahyu Computer'),
     );
-  }
-
-  Future<Penjualan> navigateToEntryForm(
-      BuildContext context, Penjualan penjualan) async {
-    var result = await Navigator.push(context,
-        MaterialPageRoute(builder: (BuildContext context) {
-      return InputPenjualan(penjualan);
-    }));
-    return result;
-  }
-
-  ListView createListView() {
-    TextStyle textStyle = Theme.of(context).textTheme.subhead;
-    return ListView.builder(
-        itemCount: count,
-        itemBuilder: (BuildContext context, int index) {
-          return Card(
-            color: Colors.white,
-            elevation: 2.0,
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Colors.lightBlue[600],
-                child: Icon(Icons.attach_money),
-              ),
-              title: Text(
-                this.penjualanList[index].name,
-                style: textStyle,
-              ),
-              subtitle: Row(
-                children: <Widget>[
-                  Text(this.penjualanList[index].tanggal),
-                  Text(
-                    " | Rp." + this.penjualanList[index].jumlah,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  )
-                ],
-              ),
-              trailing: GestureDetector(
-                child: Icon(Icons.delete),
-                onTap: () {
-                  deletePenjualan(penjualanList[index]);
-                },
-              ),
-              onTap: () async {
-                var penjualan = await navigateToEntryForm(
-                    context, this.penjualanList[index]);
-                if (penjualan != null) editPenjualan(penjualan);
-              },
-            ),
-          );
+    body:
+    var futureBuilder = FutureBuilder(
+        future: getData(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ListView.builder(
+                itemCount: snapshot.data['data'].lengt,
+                itemBuilder: (context, index) {
+                  return Container(
+                    height: 180,
+                    child: Card(
+                      elevation: 5,
+                      child: Row(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15.0)),
+                            padding: EdgeInsets.all(5),
+                            height: 120,
+                            width: 120,
+                            child: Image.network(
+                              snapshot.data['data'][index]['image_url'],
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              padding: EdgeInsets.all(8.0),
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Text(
+                                        snapshot.data['data'][index]['name'],
+                                        style: TextStyle(
+                                            fontSize: 20.0,
+                                            fontWeight: FontWeight.bold)),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Text(snapshot.data['data'][index]
+                                        ['description']),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Icon(Icons.edit),
+                                      Text(snapshot.data['data'][index]['price']
+                                          .toString())
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                });
+          } else {
+            return Text('Data error');
+          }
         });
-  }
-
-  void addPenjualan(Penjualan object) async {
-    int result = await dbHelper.insert(object);
-    if (result > 0) {
-      updateListView();
-    }
-  }
-
-  void editPenjualan(Penjualan object) async {
-    int result = await dbHelper.update(object);
-    if (result > 0) {
-      updateListView();
-      print("Ini edit Penjualan RESULT $result");
-    }
-  }
-
-  void deletePenjualan(Penjualan object) async {
-    int result = await dbHelper.delete(object.id);
-    if (result > 0) {
-      updateListView();
-    }
-  }
-
-  void updateListView() {
-    final Future<Database> dbFuture = dbHelper.initDb();
-    dbFuture.then((database) {
-      Future<List<Penjualan>> penjualanListFuture = dbHelper.getPenjualanList();
-      penjualanListFuture.then((penjualanList) {
-        setState(() {
-          this.penjualanList = penjualanList;
-          this.count = penjualanList.length;
-        });
-      });
-    });
   }
 }

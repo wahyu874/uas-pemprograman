@@ -1,37 +1,25 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_application_wahyu/models/penjualan.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 
 class InputPenjualan extends StatefulWidget {
-  final Penjualan penjualan;
-  InputPenjualan(this.penjualan);
   @override
-  _InputPenjualanState createState() => _InputPenjualanState(this.penjualan);
+  _InputPenjualanState createState() => _InputPenjualanState();
 }
 
 class _InputPenjualanState extends State<InputPenjualan> {
-  Penjualan penjualan;
-  _InputPenjualanState(this.penjualan);
   TextEditingController nameController = TextEditingController();
-  TextEditingController descController = TextEditingController();
+  TextEditingController pembeliController = TextEditingController();
   TextEditingController jumlahController = TextEditingController();
-  TextEditingController tanggalController = TextEditingController();
-  final format = DateFormat('yyyy-MM-dd');
+  TextEditingController hargaController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    if (penjualan != null) {
-      nameController.text = penjualan.name;
-      descController.text = penjualan.desc;
-      jumlahController.text = penjualan.jumlah;
-      tanggalController.text = penjualan.tanggal;
-    }
     return Scaffold(
       appBar: AppBar(
-        title: penjualan == null
-            ? Text("Transaksi Baru")
-            : Text("Update Transaksi"),
         leading: Icon(Icons.keyboard_arrow_left),
       ),
       body: Padding(
@@ -44,7 +32,7 @@ class _InputPenjualanState extends State<InputPenjualan> {
                 controller: nameController,
                 keyboardType: TextInputType.text,
                 decoration: InputDecoration(
-                    labelText: "Nama",
+                    labelText: "Nama Barang",
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(3.0))),
                 onChanged: (value) {},
@@ -53,10 +41,10 @@ class _InputPenjualanState extends State<InputPenjualan> {
             Padding(
               padding: EdgeInsets.all(10.0),
               child: TextField(
-                controller: descController,
+                controller: pembeliController,
                 keyboardType: TextInputType.text,
                 decoration: InputDecoration(
-                    labelText: "Keterangan",
+                    labelText: "Keterangan Barang",
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(3.0))),
                 onChanged: (value) {},
@@ -68,7 +56,7 @@ class _InputPenjualanState extends State<InputPenjualan> {
                 controller: jumlahController,
                 keyboardType: TextInputType.text,
                 decoration: InputDecoration(
-                    labelText: "Jumlah",
+                    labelText: "Jumlah Barang",
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(3.0))),
                 onChanged: (value) {},
@@ -77,23 +65,7 @@ class _InputPenjualanState extends State<InputPenjualan> {
             Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
-                children: <Widget>[
-                  DateTimeField(
-                    controller: tanggalController,
-                    format: format,
-                    onShowPicker: (context, currentValue) {
-                      return showDatePicker(
-                          context: context,
-                          initialDate: currentValue ?? DateTime.now(),
-                          firstDate: DateTime(2021),
-                          lastDate: DateTime(2045));
-                    },
-                    decoration: InputDecoration(
-                        labelText: "Tanggal",
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(3.0))),
-                  )
-                ],
+                children: <Widget>[],
               ),
             ),
             Padding(
@@ -108,22 +80,7 @@ class _InputPenjualanState extends State<InputPenjualan> {
                         "Simpan",
                         textScaleFactor: 1.5,
                       ),
-                      onPressed: () {
-                        if (penjualan == null) {
-                          penjualan = Penjualan(
-                              nameController.text,
-                              descController.text,
-                              jumlahController.text,
-                              tanggalController.text);
-                        } else {
-                          penjualan.name = nameController.text;
-                          penjualan.desc = descController.text;
-                          penjualan.jumlah = jumlahController.text;
-                          penjualan.tanggal = tanggalController.text;
-                          print("ini update");
-                        }
-                        Navigator.pop(context, penjualan);
-                      },
+                      onPressed: () {},
                     ),
                   ),
                   Container(

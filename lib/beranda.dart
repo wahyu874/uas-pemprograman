@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_wahyu/models/penjualan.dart';
-import 'package:flutter_application_wahyu/ui/home.dart' as home;
+
 import 'package:flutter_application_wahyu/ui/inputpenjualan.dart';
 import './menuDrawer.dart' as menuDrawer;
 import 'produk.dart';
@@ -31,8 +31,10 @@ class _BerandaState extends State<Beranda> {
           IconButton(
             icon: Icon(Icons.notifications_active),
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (BuildContext) => home.Home()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (BuildContext) => InputPenjualan()));
             },
           )
         ],
